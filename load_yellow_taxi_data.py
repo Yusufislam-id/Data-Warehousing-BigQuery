@@ -8,7 +8,7 @@ import time
 BUCKET_NAME = "de-zoomcamp-447504-gcp-bucket"  
 
 # If you authenticated through the GCP SDK you can comment out these two lines
-CREDENTIALS_FILE = "./keys/cred.json"  
+CREDENTIALS_FILE = "./terraform/keys/cred.json"  
 client = storage.Client.from_service_account_json(CREDENTIALS_FILE)
 
 BASE_URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-"
