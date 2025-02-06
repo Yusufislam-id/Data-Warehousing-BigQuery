@@ -113,6 +113,20 @@ What is the best strategy to make an optimized table in Big Query if your query 
 
 Answer :
 
+```sql
+-- filter based on tpep_dropoff_datetime and order the results by VendorID
+CREATE OR REPLACE TABLE `de-zoomcamp-447504.ny_taxi.yellow_tripdata_2024_partitioned`
+PARTITION BY DATE(tpep_dropoff_datetime)
+CLUSTER BY VendorID AS
+SELECT * FROM `de-zoomcamp-447504.ny_taxi.external_yellow_tripdata_2024`;
+```
+
+- Partitioning by tpep_dropoff_datetime
+  Since the query will always filter based on tpep_dropoff_datetime, partitioning by this column ensures that queries only scan the necessary partitions instead of the entire table, improving performance and reducing costs.
+- Clustering on VendorID
+  Since the results are ordered by VendorID, clustering on this column will help BigQuery efficiently sort and retrieve data with minimal sorting overhead.
+  Clustering also helps optimize storage and retrieval by physically organizing data within each partition.
+
 ## Question 6:
 
 Write a query to retrieve the distinct VendorIDs between tpep_dropoff_datetime
@@ -129,6 +143,22 @@ Choose the answer which most closely matches.</br>
 
 Answer :
 
+```sql
+-- distinct VendorIDs between tpep_dropoff_datetime 2024-03-01 and 2024-03-15 (inclusive)
+
+SELECT DISTINCT VendorID
+FROM `de-zoomcamp-447504.ny_taxi.native_yellow_tripdata_2024`
+WHERE tpep_dropoff_datetime >= '2024-03-01'
+AND tpep_dropoff_datetime <=  '2024-03-15';
+-- 310.24MB for native table
+
+SELECT DISTINCT VendorID
+FROM `de-zoomcamp-447504.ny_taxi.yellow_tripdata_2024_partitioned`
+WHERE tpep_dropoff_datetime >= '2024-03-01'
+AND tpep_dropoff_datetime <=  '2024-03-15';
+-- 26.84MB for partitioned table
+```
+
 ## Question 7:
 
 Where is the data stored in the External Table you created?
@@ -141,6 +171,17 @@ Where is the data stored in the External Table you created?
 Answer :
 
 - GCP Bucket
+
+  When you create an external table in BigQuery, the actual data remains in its original location (e.g., Google Cloud Storage (GCS), Google Drive, or external databases), and BigQuery only reads the data when queried.
+
+  An external table allows you to query data without loading it into BigQuery, which can save storage costs and provide more flexibility.
+
+  Key Features:
+
+  - Data Stays in the Source (e.g., GCS, Google Drive, Bigtable, or Cloud SQL)
+  - No Ingestion Costs (since data is not stored in BigQuery)
+  - Queries May Be Slower than native BigQuery tables
+  - Supports Various Formats (CSV, JSON, Parquet, Avro, ORC)
 
 ## Question 8:
 
